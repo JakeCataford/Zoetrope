@@ -5,6 +5,24 @@ class Gif < ActiveRecord::Base
   belongs_to :session
   validates :source_url, presence: true
 
+  state_machine :state, initial: :incomplete do
+    state :processing
+    state :uploading
+    state :ready
+
+    event :process_image! do
+      transition :incomplete => :processing, if: :image_is_ready_for_processing?
+    end
+
+    event :upload_image! do
+      transition :processing => :uploading, if: :image_is_ready_for_upload?
+    end
+
+    event :complete! do
+      transition :uploading => :ready
+    end
+  end
+
   attr_accessor :cached_video_info
 
   validate :source_url, :has_properly_formed_source_url?
@@ -57,5 +75,13 @@ class Gif < ActiveRecord::Base
 
   def is_youtube_url?(s)
     s =~ YOUTUBE_URL_PATTERN
+  end
+
+  def image_is_ready_for_processing?
+    true
+  end
+
+  def image_is_ready_for_upload?
+    true
   end
 end
