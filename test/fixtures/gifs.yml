@@ -1,0 +1,4 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+gif_with_valid_source_url:
+  source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg

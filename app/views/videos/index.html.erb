@@ -1,0 +1,10 @@
+<h1><marquee>MY COOL VIDEOS</marquee></h1>
+
+<div class="videos">
+  <% @videos.each do |v| %>
+  <h3><%= link_to v.title, video_path(v) %></h3>
+    <p><%= v.description %></p>
+  <% end %>
+</div>
+
+<%= link_to "Make a new vid! :)", new_video_path, class: "new-video-button"%>
