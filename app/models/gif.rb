@@ -6,12 +6,17 @@ class Gif < ActiveRecord::Base
   validates :source_url, presence: true
 
   state_machine :state, initial: :incomplete do
+    state :queued
     state :processing
     state :uploading
     state :ready
 
+    event :queue_image! do
+      transition :incomplete => :queued, if: :image_is_ready_to_be_queued?
+    end
+
     event :process_image! do
-      transition :incomplete => :processing, if: :image_is_ready_for_processing?
+      transition :queued => :processing, if: :image_is_ready_for_processing?
     end
 
     event :upload_image! do
@@ -74,6 +79,10 @@ class Gif < ActiveRecord::Base
 
   def is_youtube_url?(s)
     s =~ YOUTUBE_URL_PATTERN
+  end
+
+  def image_is_ready_to_be_queued?
+    true
   end
 
   def image_is_ready_for_processing?

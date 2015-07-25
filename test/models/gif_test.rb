@@ -60,26 +60,32 @@ class GifTest < ActiveSupport::TestCase
     assert(@gif.video_download_link, "Download link did not get set on save.")
   end
 
+  test "queue_image mutates state" do
+    @gif.state = "incomplete"
+    @gif.queue_image!
+    assert_state(@gif, "queued")
+  end
+
   test "process_image mutates state" do
-    assert_state(@gif, :incomplete)
+    @gif.state = "queued"
     @gif.process_image!
-    assert_state(@gif, :processing)
+    assert_state(@gif, "processing")
   end
 
   test "upload_image mutates state" do
-    assert_state(@gif, :processing)
+    @gif.state = "processing"
     @gif.upload_image!
-    assert_state(@gif, :uploading)
+    assert_state(@gif, "uploading")
   end
 
   test "complete mutates state" do
-    assert_state(@gif, :processing)
+    @gif.state = "uploading"
     @gif.complete!
-    assert_state(@gif, :ready)
+    assert_state(@gif, "ready")
   end
 
   private
   def assert_state(model, state)
-    assert(model.state = state, "State was not as expected. (#{model.state.to_s} instead of #{state})")
+    assert(model.state == state, "State was not as expected. (#{model.state.to_s} instead of #{state})")
   end
 end
