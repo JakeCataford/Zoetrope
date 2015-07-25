@@ -52,7 +52,6 @@ class Gif < ActiveRecord::Base
 
   def youtube_video_info
     return cached_video_info unless cached_video_info.nil?
-
     conn = Faraday.new(:url => 'http://www.youtube.com')
     info_url = "/get_video_info?video_id=#{youtube_video_id}&el=embedded"
     response = conn.get info_url

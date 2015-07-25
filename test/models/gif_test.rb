@@ -2,8 +2,13 @@ require 'test_helper'
 
 class GifTest < ActiveSupport::TestCase
   def setup
+    VCR.insert_cassette("gif_requests", :record => :new_episodes)
     @new_gif = Gif.new
     @gif = gifs(:gif_with_valid_source_url)
+  end
+
+  def teardown
+    VCR.eject_cassette
   end
 
   test "validates source_url presence" do
