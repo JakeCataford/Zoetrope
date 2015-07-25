@@ -11,4 +11,10 @@ class ActiveSupport::TestCase
       assert(model.errors.keys.include?(property), "Validation errors did not include '#{property.to_s}'")
     end
   end
+
+  def assert_no_errors(model, *properties_that_should_not_have_errors)
+    properties_that_should_not_have_errors.each do |property|
+      assert_not(model.errors.keys.include?(property), "'#{property.to_s}' had errors when it shouldn't have.")
+    end
+  end
 end

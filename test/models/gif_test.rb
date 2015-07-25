@@ -47,6 +47,11 @@ class GifTest < ActiveSupport::TestCase
 
   test "validates source_url accepts working links" do
     @gif.save
-    assert(@gif.valid?, "Had errors when saving gif with working links: #{@gif.errors.messages.to_s}")
+    assert_no_errors(@gif, :source_url)
+  end
+
+  test "download link is set on save" do
+    @gif.save
+    assert(@gif.video_download_link, "Download link did not get set on save.")
   end
 end

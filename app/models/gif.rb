@@ -1,9 +1,11 @@
 class Gif < ActiveRecord::Base
   YOUTUBE_URL_PATTERN = /(?:https:\/\/|http:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/(?:watch\?v=)?([A-Za-z0-9]+)(?:\?)?/i
   YOUTUBE_INFO_URL = "http://youtube.com/get_video_info/%s"
-
+  before_save :set_video_download_link
   belongs_to :session
   validates :source_url, presence: true
+
+  attr_accessor :cached_video_info
 
   validate :source_url, :has_properly_formed_source_url?
   def has_properly_formed_source_url?
@@ -31,13 +33,13 @@ class Gif < ActiveRecord::Base
   end
 
   def youtube_video_info
+    return cached_video_info unless cached_video_info.nil?
 
     conn = Faraday.new(:url => 'http://www.youtube.com')
     info_url = "/get_video_info?video_id=#{youtube_video_id}&el=embedded"
     response = conn.get info_url
     return nil unless response.success?
     info = CGI.parse(response.body)
-    puts info
     if info["status"][0] == "ok"
       info
     else
@@ -45,13 +47,15 @@ class Gif < ActiveRecord::Base
     end
   end
 
+  def youtube_video_token
+    youtube_video_info["token"][0]
+  end
 
+  def set_video_download_link
+    self.video_download_link = "http://youtube.com/get_video?t=#{youtube_video_token}&video_id=#{youtube_video_id}&asv=2" if self.video_download_link.nil?
+  end
 
   def is_youtube_url?(s)
     s =~ YOUTUBE_URL_PATTERN
-  end
-
-  def cache_key
-    "gif[#{ id }+#{source_url}]"
   end
 end
