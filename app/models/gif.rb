@@ -1,7 +1,7 @@
 class Gif < ActiveRecord::Base
   YOUTUBE_URL_PATTERN = /(?:https:\/\/|http:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/(?:watch\?v=)?([A-Za-z0-9]+)(?:\?)?/i
   YOUTUBE_INFO_URL = "http://youtube.com/get_video_info/%s"
-  before_save :set_video_download_link
+  before_save :set_video_download_link, :set_title
   belongs_to :session
   validates :source_url, presence: true
 
@@ -43,6 +43,10 @@ class Gif < ActiveRecord::Base
   def youtube_video_id
     return nil if source_url.nil? || !is_youtube_url?(source_url)
     source_url.match(YOUTUBE_URL_PATTERN).captures.last
+  end
+
+  def set_title
+    self.title = youtube_video_info["title"][0]
   end
 
   validate :source_url, :youtube_link_is_active?

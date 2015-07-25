@@ -84,6 +84,11 @@ class GifTest < ActiveSupport::TestCase
     assert_state(@gif, "ready")
   end
 
+  test "title is set on save" do
+    @gif.save
+    assert_equal("SVBLM Presents: The Stranger (Release Trailer)", @gif.title)
+  end
+
   private
   def assert_state(model, state)
     assert(model.state == state, "State was not as expected. (#{model.state.to_s} instead of #{state})")
