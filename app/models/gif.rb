@@ -31,17 +31,27 @@ class Gif < ActiveRecord::Base
   end
 
   def youtube_video_info
+
     conn = Faraday.new(:url => 'http://www.youtube.com')
-    response = conn.get "/get_video_info?video_id=#{youtube_video_id}."
-    if response.success?
-      puts response.body
-      true
+    info_url = "/get_video_info?video_id=#{youtube_video_id}&el=embedded"
+    response = conn.get info_url
+    return nil unless response.success?
+    info = CGI.parse(response.body)
+    puts info
+    if info["status"][0] == "ok"
+      info
     else
       nil
     end
   end
 
+
+
   def is_youtube_url?(s)
     s =~ YOUTUBE_URL_PATTERN
+  end
+
+  def cache_key
+    "gif[#{ id }+#{source_url}]"
   end
 end
