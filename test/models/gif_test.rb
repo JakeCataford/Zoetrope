@@ -55,8 +55,7 @@ class GifTest < ActiveSupport::TestCase
     assert_no_errors(@gif, :source_url)
   end
 
-  test "download link is set on save" do
-    @gif.save
+  test "video_download_link returns a url" do
     assert(@gif.video_download_link, "Download link did not get set on save.")
   end
 
@@ -72,14 +71,8 @@ class GifTest < ActiveSupport::TestCase
     assert_state(@gif, "processing")
   end
 
-  test "upload_image mutates state" do
-    @gif.state = "processing"
-    @gif.upload_image!
-    assert_state(@gif, "uploading")
-  end
-
   test "complete mutates state" do
-    @gif.state = "uploading"
+    @gif.state = "processing"
     @gif.complete!
     assert_state(@gif, "ready")
   end

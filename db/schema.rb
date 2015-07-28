@@ -17,10 +17,11 @@ ActiveRecord::Schema.define(version: 20150730023727) do
     t.string   "title"
     t.string   "source_url"
     t.integer  "session_id"
-    t.datetime "created_at",          null: false
-    t.datetime "updated_at",          null: false
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
     t.string   "state"
-    t.string   "video_download_link"
+    t.string   "status"
+    t.string   "progress"
     t.integer  "start_time"
     t.integer  "end_time"
     t.integer  "video_length"

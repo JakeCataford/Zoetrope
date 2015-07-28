@@ -12,6 +12,8 @@ gem 'paperclip', '~> 4.3'
 gem 'state_machines'
 gem 'faraday'
 gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
+gem "viddl-rb"
+gem "open4"
 
 group :test do
   gem 'webmock'
@@ -22,5 +24,6 @@ group :development, :test do
   gem 'byebug'
   gem 'web-console', '~> 2.0'
   gem 'spring'
+  gem 'resque-backtrace', github: "JakeCataford/resque-backtrace"
 end
 
