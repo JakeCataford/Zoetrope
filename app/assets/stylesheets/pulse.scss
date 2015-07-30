@@ -1,0 +1,10 @@
+.pulse {
+  -webkit-animation: pulsate 1s ease-in-out;
+  -webkit-animation-iteration-count: infinite;
+}
+
+@-webkit-keyframes pulsate {
+  0% {-webkit-transform: scale(0.9, 0.9);}
+  50% {-webkit-transform: scale(1.1, 1.1);}
+  100% {-webkit-transform: scale(0.9, 0.9);}
+}

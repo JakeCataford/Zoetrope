@@ -1,3 +1,81 @@
-// Place all the styles related to the gifs controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+@import "variables";
+
+$placeholder-color: rgba(255,255,255,0.3);
+
+.new-gif {
+  text-align: center;
+  .header {
+    h1 {
+      font-size: 3em;
+    }
+
+    h2 {
+      font-size: 1em;
+      font-weight: normal;
+    }
+  }
+
+  .jumbo {
+    background: rgba(255,255,255,0.3);
+    border: none;
+    width: 400px;
+    display: block;
+    margin: 40px auto 10px;
+    padding: 22px;
+    border-radius: 11px;
+    font-size: 1.2em;
+    color: #eee;
+    text-align: center;
+    font-family: "Fredoka One";
+
+    &:focus {
+      outline: 0;
+      border: none
+    }
+
+    &::-webkit-input-placeholder {
+      color: $placeholder-color;
+    }
+
+    &::-moz-placeholder {
+      color: $placeholder-color;
+    }
+
+    &::-ms-placeholder {
+      color: $placeholder-color;
+    }
+  }
+
+  .errors {
+    color: #e58787;
+    font-size: 0.8em;
+  }
+
+  .jumbo-button {
+    background: $button-teal;
+    border-radius: 8px;
+    padding: 15px;
+    font-size: 1.5em;
+    border: none;
+    font-family: "Fredoka One";
+    color: #eee;
+    margin-top:20px;
+    box-shadow: 0px 6px 0px darken($button-teal, 10%);
+    cursor: pointer;
+    &:hover {
+      background: lighten($button-teal, 10%)
+    }
+
+    &:focus {
+      outline: 0;
+      border: none
+    }
+  }
+}
+
+.gif {
+  text-align:center;
+  img {
+    border-radius: 10px;
+  }
+}

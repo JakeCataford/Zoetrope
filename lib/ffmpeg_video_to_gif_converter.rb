@@ -10,7 +10,7 @@ class FFMpegVideoGifConverter
       start_frame: 0,
       length: 100,
       flags: "lanczos",
-      fps: 21,
+      fps: 20,
       scale: 0.5
     }
 

@@ -4,11 +4,14 @@ class ProcessVideoToGifJob < ActiveJob::Base
   queue_as :default
   def perform(gif_id, url)
     @gif = Gif.find(gif_id)
+    @gif.processing!
     update_gif_status("Fetching video from youtube...")
     video_path = download_video(url)
     update_gif_status("Converting video to gif...")
     gif_path = convert_video_to_gif(video_path)
     update_gif_status("Uploading gif to imgur.")
+    upload_image(gif_path)
+    update_gif_status("Done!")
   end
 
   def download_video(url)
@@ -36,6 +39,26 @@ class ProcessVideoToGifJob < ActiveJob::Base
       file.close
     end
     file.path
+  end
+
+  def upload_image(gif_url)
+    imgur_client_id = "3eb992fd43b1477"
+    conn = Faraday.new "https://api.imgur.com" do |f|
+      f.request :multipart
+      f.response :logger
+      f.adapter Faraday.default_adapter
+    end
+
+    payload = { image: Faraday::UploadIO.new(gif_url, 'image/gif') }
+    imgur_response = conn.post do |req|
+      req.url "3/image.json"
+      req.headers["Authorization"] = "Client-ID #{imgur_client_id}"
+      req.body = payload
+    end
+
+    raise "Failed to upload image to imgur." unless imgur_response.success?
+    @gif.url = JSON.parse(imgur_response.body)["data"]["link"]
+    @gif.ready!
   end
 
   def convert_video_to_gif(video_path)

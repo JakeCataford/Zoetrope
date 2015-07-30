@@ -2,3 +2,6 @@
 
 gif_with_valid_source_url:
   source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
+
+gif_with_shortform_url:
+  source_url: https://youtu.be/fNCuInGejuw

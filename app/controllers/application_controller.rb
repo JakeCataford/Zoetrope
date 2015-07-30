@@ -5,6 +5,13 @@ class ApplicationController < ActionController::Base
   before_action :set_session
 
   def set_session
-    session[:session] = Session.new unless session.has_key? :session
+    unless session.has_key? :current_session
+      s = Session.create!
+      session[:current_session] = s.id
+    end
+  end
+
+  def current_session
+    Session.find(session[:current_session])
   end
 end

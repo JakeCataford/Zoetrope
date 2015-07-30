@@ -5,6 +5,7 @@ class GifTest < ActiveSupport::TestCase
     VCR.insert_cassette("gif_requests", :record => :new_episodes)
     @new_gif = Gif.new
     @gif = gifs(:gif_with_valid_source_url)
+    @gif_shortform
   end
 
   def teardown
@@ -32,10 +33,8 @@ class GifTest < ActiveSupport::TestCase
     assert(@new_gif.is_youtube_url?("https://youtu.be/sfjosaf"), "Failed to recognize short form http youtube url.")
   end
 
-  test "#youtube_video_id gets video id from long form source_url" do
-    video_id = "1a3b5c7f"
-    @new_gif.source_url = "http://youtube.com/watch?v=#{video_id}"
-    assert_equal(video_id, @new_gif.youtube_video_id)
+  test "viddlerb can get longform url" do
+    assert_not_nil(@gif.video_download_link)
   end
 
   test "#youtube_video_id gets video id from short form source_url" do

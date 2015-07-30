@@ -1,0 +1,19 @@
+<div class="new-gif">
+  <div class="header">
+    <h1>Create your own gifs.</h1>
+    <h2>enter a youtube url to get started</h2>
+  </div>
+
+  <%= form_for(@gif, class: "jumbo-form") do |f| %>
+    <%= f.text_field :source_url, class: "jumbo", placeholder: "http://youtube.com/watch?v=video" %>
+    <div class="errors bounce">
+      <% if @gif.errors.any? %>
+        <p><%= @gif.errors.messages[:source_url].first %></p>
+      <% end %>
+    </div>
+    <%= button_tag type: "submit", class: "jumbo-button bounce", data: { reveal: ".tiny.loader", hide: ".text"} do %>
+      <div class="text">Get Started</div>
+      <div class="tiny loader" style="display:none"></div>
+    <% end %>
+  <% end %>
+</div>
