@@ -1,9 +1,46 @@
 class Gif < ActiveRecord::Base
   YOUTUBE_URL_PATTERN = /(?:https:\/\/|http:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/(?:watch\?v=)?([A-Za-z0-9]+)(?:\?)?/i
   YOUTUBE_INFO_URL = "http://youtube.com/get_video_info/%s"
-  before_save :set_video_download_link, :set_title
+  before_save :set_video_download_link, :set_title, :set_video_length
+  before_validation :set_start_time_and_end_time
   belongs_to :session
   validates :source_url, presence: true
+  #validates :video_length, length: {minimum: 1, maximum: 36000}
+  #validates :start_time, :end_time, if: :gif_length?
+
+  #def valid_marker?(m) 
+   # if m >= 0 && m <= video_length
+    #  return true
+   # else
+    #  return false
+  #end
+
+  #validate :start_time, :end_time, :gif_length?
+  #def gif_length?
+    #if (start_time - end_time).abs > 1
+      #return true
+    #else
+      #errors.add(:start_time, :end_time, "Gif is too short.")
+      #return false
+  #end
+
+  #validate :start_time, :valid_start_time?
+  #def valid_start_time?
+    #if valid_marker?(start_time)
+      #true
+    #else
+      #errors.add(:start_time, "Not a valid start_time marker.")
+      #false
+  #end
+
+  #validate :end_time, :valid_end_time?
+  #def valid_end_time?
+    #if valid_marker?(end_time)
+     # true
+    #else
+    #  errors.add(:end_time, "Not a valid end_time marker.")
+   #   false
+  #end
 
   state_machine :state, initial: :incomplete do
     state :queued
@@ -49,6 +86,10 @@ class Gif < ActiveRecord::Base
     self.title = youtube_video_info["title"][0]
   end
 
+  def set_video_length
+    self.video_length = youtube_video_info["length_seconds"][0].to_i
+  end
+
   validate :source_url, :youtube_link_is_active?
   def youtube_link_is_active?
     if info = youtube_video_info
@@ -66,6 +107,7 @@ class Gif < ActiveRecord::Base
     response = conn.get info_url
     return nil unless response.success?
     info = CGI.parse(response.body)
+    puts info
     if info["status"][0] == "ok"
       info
     else
