@@ -1,0 +1,22 @@
+<div class="compose">
+  <video class="gif-editor" width="500" muted autoplay>
+    <source src="<%= @gif.video_download_link %>">
+      <h1>Your browser does not support html5 video.</h1>
+    </video>
+
+    <div class="controls">
+      <div class="track"></div>
+      <div class="track-fill"></div>
+      <div class="playhead"></div>
+      <div class="handle min" draggable=true>
+        <div class="time-display">10:10:111
+        </div>
+      </div>
+      <div class="handle max" draggable=true>
+        <div class="time-display">10:10:111
+        </div>
+      </div>
+    </div>
+    <img src="'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';" class="nothing"/>
+  </div>
+</div>

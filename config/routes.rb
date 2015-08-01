@@ -4,6 +4,7 @@ Rails.application.routes.draw do
     member do
       get "compose"
       get "progress"
+      get "validate"
     end
   end
 end

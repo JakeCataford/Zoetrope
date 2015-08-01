@@ -24,7 +24,6 @@ class ProcessVideoToGifJob < ActiveJob::Base
         http.request request do |response|
           file_size = response['content-length'].to_i
           amount_downloaded = 0
-
           response.read_body do |chunk|
             file.write chunk
             amount_downloaded += chunk.size

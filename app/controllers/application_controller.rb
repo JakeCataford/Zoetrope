@@ -13,5 +13,9 @@ class ApplicationController < ActionController::Base
 
   def current_session
     Session.find(session[:current_session])
+  rescue ActiveRecord::RecordNotFound
+    session.delete(:current_session)
+    set_session
+    Session.find(session[:current_session])
   end
 end

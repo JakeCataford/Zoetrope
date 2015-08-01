@@ -17,6 +17,7 @@ gem "open4"
 group :test do
   gem 'webmock'
   gem 'vcr'
+  gem 'resque_spec'
 end
 
 group :development, :test do

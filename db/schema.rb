@@ -11,21 +11,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150730023727) do
+ActiveRecord::Schema.define(version: 20150731202324) do
 
   create_table "gifs", force: :cascade do |t|
     t.string   "title"
     t.string   "source_url"
     t.integer  "session_id"
-    t.datetime "created_at",               null: false
-    t.datetime "updated_at",               null: false
-    t.integer  "queue_status", default: 0
+    t.datetime "created_at",                             null: false
+    t.datetime "updated_at",                             null: false
+    t.integer  "queue_status",               default: 0
     t.string   "status"
     t.string   "progress"
     t.string   "url"
     t.integer  "start_time"
     t.integer  "end_time"
     t.integer  "video_length"
+    t.integer  "external_validation_status", default: 0
+    t.string   "temporary_download_link"
   end
 
   create_table "sessions", force: :cascade do |t|

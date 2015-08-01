@@ -4,9 +4,16 @@ class Gif < ActiveRecord::Base
   before_save :set_video_download_link, :set_title, :set_video_length
   before_validation :set_start_time_and_end_time
   belongs_to :session
+
+  enum queue_status: [:needs_composing, :queued, :processing, :ready]
+  enum external_validation_status: [:needs_external_validation, :failed_external_validation, :succeeded_external_validation]
+
   validates :source_url, presence: true
+  validate :source_url, :has_properly_formed_source_url?
   validates :video_length, length: {minimum: 1, maximum: 10.minutes.to_seconds}
   validates :start_time, :end_time
+
+  after_create :externally_validate_download_link
 
 
   validate :start_time, :end_time, :gif_length?
@@ -38,11 +45,6 @@ class Gif < ActiveRecord::Base
       false
     end
   end
-
-  validate :source_url, :has_properly_formed_source_url?
-  enum queue_status: [:needs_composing, :queued, :processing, :ready]
-  validate :source_url, :has_properly_formed_source_url?, :can_be_downloaded?
-
   def has_properly_formed_source_url?
     if is_youtube_url?(source_url)
       true
@@ -94,21 +96,15 @@ class Gif < ActiveRecord::Base
     youtube_video_info["token"][0]
   end
 
-  def can_be_downloaded?
-    if video_download_link.nil?
-      errors.add(:source_url, "We couldn't download that video.
-                              Maybe the url is incorrect or the
-                              video is protected by DRM.".chomp)
-      false
-    end
-  end
-
   def video_download_link
     attempts = 0
-
     begin
-      urls = ViddlRb.get_urls(source_url)
-      return urls.first unless urls.nil?
+      Rails.cache.fetch("#{cache_key}.video_download_link", expires_in: 1.minutes) do
+        urls = ViddlRb.get_urls(source_url)
+        unless urls.nil?
+          urls.first
+        end
+      end
     rescue ViddlRb::DownloadError
       attempts += 1
       retry if attempts < 3
@@ -120,13 +116,15 @@ class Gif < ActiveRecord::Base
     s =~ YOUTUBE_URL_PATTERN
   end
 
+  def externally_validate_download_link
+    ValidateYoutubeLinkJob.new(id).enqueue if self.needs_external_validation?
+  end
+
   def queue_image_for_processing
     ProcessVideoToGifJob.new(id, self.video_download_link).enqueue
     self.status = "Image is queued for processing."
     queued!
   end
-
-  private
 
   def valid_marker?(m)
     if m >= 0 && m <= video_length
@@ -134,5 +132,9 @@ class Gif < ActiveRecord::Base
     else
       return false
     end
+  end
+
+  def cache_key
+    "gifs.#{id}"
   end
 end

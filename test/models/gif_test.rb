@@ -37,10 +37,8 @@ class GifTest < ActiveSupport::TestCase
     assert_not_nil(@gif.video_download_link)
   end
 
-  test "#youtube_video_id gets video id from short form source_url" do
-    video_id = "1a3b5c7f"
-    @new_gif.source_url = "http://youtube.com/watch?v=#{video_id}"
-    assert_equal(video_id, @new_gif.youtube_video_id)
+  test "viddlerb can get shortform url" do
+    assert_not_nil(@gif.video_download_link)
   end
 
   test "validates source_url rejects dead links" do
@@ -56,24 +54,6 @@ class GifTest < ActiveSupport::TestCase
 
   test "video_download_link returns a url" do
     assert(@gif.video_download_link, "Download link did not get set on save.")
-  end
-
-  test "queue_image mutates state" do
-    @gif.state = "incomplete"
-    @gif.queue_image!
-    assert_state(@gif, "queued")
-  end
-
-  test "process_image mutates state" do
-    @gif.state = "queued"
-    @gif.process_image!
-    assert_state(@gif, "processing")
-  end
-
-  test "complete mutates state" do
-    @gif.state = "processing"
-    @gif.complete!
-    assert_state(@gif, "ready")
   end
 
   test "title is set on save" do
