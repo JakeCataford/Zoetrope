@@ -65,6 +65,8 @@ class FFMpegVideoGifConverter
 
     raise "Failed to transcode video to gif." unless success
 
+    File.delete(@optimization_path)
+
     output_path
   end
 

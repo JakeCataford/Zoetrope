@@ -49,11 +49,11 @@ class Gif < ActiveRecord::Base
   end
 
   def fetch_title
-    self.title = youtube_video_info["title"][0]
+    self.title = youtube_video_info["title"][0] unless youtube_video_info.nil?
   end
 
   def fetch_video_length
-    self.video_length = youtube_video_info["length_seconds"][0].to_i
+    self.video_length = youtube_video_info["length_seconds"][0].to_i unless youtube_video_info.nil?
   end
 
   def youtube_video_info

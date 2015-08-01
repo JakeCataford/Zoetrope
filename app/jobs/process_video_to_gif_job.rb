@@ -11,6 +11,9 @@ class ProcessVideoToGifJob < ActiveJob::Base
     gif_path = convert_video_to_gif(video_path)
     update_gif_status("Uploading gif to imgur.")
     upload_image(gif_path)
+    update_gif_status("Cleaning up.")
+    File.delete(video_path)
+    File.delete(gif_path)
     update_gif_status("Done!")
   end
 
@@ -18,7 +21,7 @@ class ProcessVideoToGifJob < ActiveJob::Base
     puts "downloading video\n"
     uri = URI(url)
     begin
-      file = Tempfile.open(["gif_#{@gif.id}", ".flv"], Rails.root.join('tmp'), encoding: 'ascii-8bit')
+      file = Tempfile.open(["gif_#{@gif.id}_", ".flv"], Rails.root.join('tmp'), encoding: 'ascii-8bit')
       Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
         request = Net::HTTP::Get.new uri
         http.request request do |response|
@@ -41,7 +44,7 @@ class ProcessVideoToGifJob < ActiveJob::Base
   end
 
   def upload_image(gif_url)
-    imgur_client_id = "3eb992fd43b1477"
+    imgur_client_id = ENV["IMGUR_CLIENT_ID"]
     conn = Faraday.new "https://api.imgur.com" do |f|
       f.request :multipart
       f.response :logger
