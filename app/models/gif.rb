@@ -1,23 +1,21 @@
 class Gif < ActiveRecord::Base
   YOUTUBE_URL_PATTERN = /(?:https:\/\/|http:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/(?:watch\?v=)?([\-_A-Za-z0-9]+)(?:\?)?/i
   YOUTUBE_INFO_URL = "http://youtube.com/get_video_info/%s"
-  before_save :set_video_download_link, :set_title, :set_video_length
-  before_validation :set_start_time_and_end_time
   belongs_to :session
 
   enum queue_status: [:needs_composing, :queued, :processing, :ready]
   enum external_validation_status: [:needs_external_validation, :failed_external_validation, :succeeded_external_validation]
 
   validates :source_url, presence: true
-  validate :source_url, :has_properly_formed_source_url?
-  validates :video_length, length: {minimum: 1, maximum: 10.minutes.to_seconds}
-  validates :start_time, :end_time
+  validates :video_length, length: {minimum: 1, maximum: 600}, unless: 'video_length.nil?'
+
+  before_save :constrain_time_to_video_duration, :reconcile_start_end_times_to_be_sequential, if: Proc.new { !start_time.nil? || !end_time.nil? }
 
   after_create :externally_validate_download_link
 
 
-  validate :start_time, :end_time, :gif_length?
-  def gif_length?
+  validate :start_time, :end_time, :gif_is_not_too_short?, if: Proc.new { !start_time.nil? || !end_time.nil? }
+  def gif_is_not_too_short?
     if (start_time - end_time).abs > 1
       true
     else
@@ -26,25 +24,7 @@ class Gif < ActiveRecord::Base
     end
   end
 
-  validate :start_time, :valid_start_time?
-  def valid_start_time?
-    if valid_marker?(start_time)
-      true
-    else
-      errors.add(:start_time, "Not a valid start_time marker.")
-      false
-    end
-  end
-
-  validate :end_time, :valid_end_time?
-  def valid_end_time?
-    if valid_marker?(end_time)
-      true
-    else
-      errors.add(:end_time, "Not a valid end_time marker.")
-      false
-    end
-  end
+  validate :source_url, :has_properly_formed_source_url?
   def has_properly_formed_source_url?
     if is_youtube_url?(source_url)
       true
@@ -54,46 +34,43 @@ class Gif < ActiveRecord::Base
     end
   end
 
+  def constrain_time_to_video_duration
+    self.start_time = clamp(start_time, 0, video_length)
+    self.end_time = clamp(end_time, 0, video_length)
+  end
+
+  def reconcile_start_and_end_times_to_be_sequential
+    self.start_time, self.end_time = [start_time, end_time].sort
+  end
+
   def youtube_video_id
     return nil if source_url.nil? || !is_youtube_url?(source_url)
     source_url.match(YOUTUBE_URL_PATTERN).captures.last
   end
 
-  def set_title
+  def fetch_title
     self.title = youtube_video_info["title"][0]
   end
 
-  def set_video_length
+  def fetch_video_length
     self.video_length = youtube_video_info["length_seconds"][0].to_i
   end
 
-  validate :source_url, :youtube_link_is_active?
-  def youtube_link_is_active?
-    if info = youtube_video_info
-      info
-    else
-      errors.add(:source_url, "This youtube video does not exist, or is private.")
-      nil
-    end
-  end
-
   def youtube_video_info
-    return cached_video_info unless cached_video_info.nil?
-    conn = Faraday.new(:url => 'http://www.youtube.com')
-    info_url = "/get_video_info?video_id=#{youtube_video_id}&el=embedded"
-    response = conn.get info_url
-    return nil unless response.success?
-    info = CGI.parse(response.body)
-    puts info
-    if info["status"][0] == "ok"
-      info
-    else
-      nil
-    end
-  end
+    Rails.cache.fetch("#{cache_key}.video_info", expires_in: 1.minutes) do
+      info_url = "http://www.youtube.com/get_video_info?video_id=#{youtube_video_id}&el=embedded"
+      response = Faraday.get info_url
 
-  def youtube_video_token
-    youtube_video_info["token"][0]
+      return nil unless response.success?
+
+      info = CGI.parse(response.body)
+
+      if info["status"][0] == "ok"
+        info
+      else
+        nil
+      end
+    end
   end
 
   def video_download_link
@@ -126,15 +103,13 @@ class Gif < ActiveRecord::Base
     queued!
   end
 
-  def valid_marker?(m)
-    if m >= 0 && m <= video_length
-      return true
-    else
-      return false
-    end
-  end
-
   def cache_key
     "gifs.#{id}"
+  end
+
+  private
+
+  def clamp(value, low, high)
+    [low, value, high].sort[1]
   end
 end
