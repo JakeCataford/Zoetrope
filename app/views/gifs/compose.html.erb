@@ -1,6 +1,6 @@
 <div class="compose">
-  <video class="gif-editor" data-submit-url="<%= queue_gif_path(@gif) %>" width="500" muted autoplay>
-    <source src="<%= @gif.youtube_video_download_link(@gif.source_url) %>">
+  <video class="gif-editor" width="500" muted autoplay>
+    <source src="<%= @gif.youtube_video_download_link %>">
       <h1>Your browser does not support html5 video.</h1>
     </video>
 

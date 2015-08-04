@@ -15,3 +15,18 @@ composing:
   source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
   queue_status: <%= Gif.queue_statuses["composing"] %>
   session: one
+
+queued:
+  source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
+  queue_status: <%= Gif.queue_statuses["queued"] %>
+  session: one
+
+processing:
+  source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
+  queue_status: <%= Gif.queue_statuses["processing"] %>
+  session: one
+
+ready:
+  source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
+  queue_status: <%= Gif.queue_statuses["ready"] %>
+  session: one
