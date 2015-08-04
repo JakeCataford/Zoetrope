@@ -1,5 +1,7 @@
 class GifsController < ApplicationController
-  before_action :set_gif, only: [:validate, :compose, :progress, :show, :queue]
+  before_action :set_gif,
+                :ensure_gif_belongs_to_session,
+                only: [:validate, :compose, :progress, :show, :update, :aborted]
 
   def index
     @gifs = Gif.all
@@ -10,10 +12,10 @@ class GifsController < ApplicationController
   end
 
   def compose
-    if @gif.needs_composing? && @gif.succeeded_external_validation?
+    if @gif.composing?
       render_for_bindings
     else
-      redirect_to_correct_flow 
+      redirect_to_correct_flow
     end
   end
 
@@ -28,8 +30,8 @@ class GifsController < ApplicationController
     end
   end
 
-  def queue
-    if @gif.needs_composing? && @gif.succeeded_external_validation?
+  def update
+    unless @gif.aborted?
       if @gif.update(gif_compose_params)
         @gif.queue_image_for_processing
         redirect_to progress_gif_path(@gif)
@@ -42,7 +44,7 @@ class GifsController < ApplicationController
   end
 
   def validate
-    if @gif.needs_external_validation? || @gif.failed_external_validation?
+    if @gif.validating?
       render_for_bindings
     else
       redirect_to_correct_flow
@@ -58,7 +60,15 @@ class GifsController < ApplicationController
   end
 
   def progress
-    if @gif.queued?
+    if @gif.queued? || @gif.processing?
+      render_for_bindings
+    else
+      redirect_to_correct_flow
+    end
+  end
+
+  def aborted
+    if @gif.aborted?
       render_for_bindings
     else
       redirect_to_correct_flow
@@ -66,6 +76,10 @@ class GifsController < ApplicationController
   end
 
   private
+
+  def ensure_gif_belongs_to_session
+    redirect_to new_gif_path unless current_session.id == @gif.session.id
+  end
 
   def render_for_bindings
     respond_to do |format|
@@ -75,9 +89,11 @@ class GifsController < ApplicationController
   end
 
   def redirect_to_correct_flow
-    if (@gif.needs_external_validation? || @gif.failed_external_validation?)
+    if (@gif.aborted?)
+      go_to_flow aborted_gif_path(@gif)
+    elsif (@gif.validating?)
       go_to_flow validate_gif_path(@gif)
-    elsif (@gif.needs_composing?)
+    elsif (@gif.composing?)
       go_to_flow compose_gif_path(@gif)
     elsif (@gif.ready?)
       go_to_flow gif_path(@gif)
@@ -102,6 +118,6 @@ class GifsController < ApplicationController
   end
 
   def gif_compose_params
-    params.require(:gif).permit(:start_frame, :end_frame)
+    params.require(:gif).permit(:start_time, :end_time)
   end
 end

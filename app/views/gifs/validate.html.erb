@@ -1,17 +1,7 @@
 <div class="gif">
-  <% if @gif.failed_external_validation? %>
-    <h2>Validation Failed.</h2>
-    <div class="jumbo-icon"><i class="fontawesome-warning-sign"></i></div>
-    <p>We couldn't find that video, or it was protected by DRM.</p>
-    <%= link_to new_gif_path, class: "jumbo-button" do %>
-      <span class="fontawesome-undo"></span>
-      Start Over
-    <% end %>
-  <% else %>
-    <h2>Validating your gif...</h2>
-    <div class="loader">
-    </div>
-    <p>Give us a minute...</p>
-    <span data-bind="status" style="display:none"></span>
-  <% end %>
+  <h2>Validating your gif...</h2>
+  <div class="loader">
+  </div>
+  <p>Give us a minute...</p>
+  <span data-bind="status" style="display:none"></span>
 </div>

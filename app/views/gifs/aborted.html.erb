@@ -1,0 +1,12 @@
+
+<div class="gif">
+  <h1>Oops! Something went wrong!</h1>
+  <div class="jumbo-icon"><span class="fontawesome-warning-sign jumbo"></span></div>
+  <p><%= @gif.abort_reason %></p>
+  <%= link_to new_gif_path, class: "jumbo-button" do %>
+    <span class="fontawesome-undo"></span>
+    Start Over
+  <% end %>
+</div>
+
+

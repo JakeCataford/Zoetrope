@@ -15,6 +15,9 @@ class ProcessVideoToGifJob < ActiveJob::Base
     File.delete(video_path)
     File.delete(gif_path)
     update_gif_status("Done!")
+  rescue YoutubeVideo::VideoLinkUnavailable, YoutubeVideo::VideoMetadataUnavailable => e
+    @gif.abort("We couldn't reach youtube to process your video.")
+    raise e
   end
 
   def download_video(url)
@@ -58,13 +61,17 @@ class ProcessVideoToGifJob < ActiveJob::Base
       req.body = payload
     end
 
-    raise "Failed to upload image to imgur." unless imgur_response.success?
-    @gif.url = JSON.parse(imgur_response.body)["data"]["link"]
-    @gif.ready!
+    if (imgur_response.success?)
+      @gif.url = JSON.parse(imgur_response.body)["data"]["link"]
+      @gif.ready!
+    else
+      @gif.abort("Failed to upload image to imgur.") unless imgur_response.success?
+    end
   end
 
   def convert_video_to_gif(video_path)
-    vid_to_gif = FFMpegVideoGifConverter.new video_path
+    byebug
+    vid_to_gif = FFMpegVideoGifConverter.new video_path, start_time: @gif.start_time, end_time: @gif.end_time
 
     puts "Generating pallete for gif..."
     vid_to_gif.create_optimization_pallete! do |progress|
@@ -81,11 +88,11 @@ class ProcessVideoToGifJob < ActiveJob::Base
 
   def update_gif_status(status)
     @gif.status = status
-    raise "Failed to update gif status." unless @gif.save
+    @gif.save
   end
 
   def update_gif_progress(progress)
     @gif.progress = progress
-    raise "Failed to update gif progress." unless @gif.save
+    @gif.save
   end
 end

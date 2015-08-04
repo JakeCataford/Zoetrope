@@ -1,6 +1,6 @@
 <div class="compose">
-  <video class="gif-editor" width="500" muted autoplay>
-    <source src="<%= @gif.video_download_link %>">
+  <video class="gif-editor" data-submit-url="<%= queue_gif_path(@gif) %>" width="500" muted autoplay>
+    <source src="<%= @gif.youtube_video_download_link(@gif.source_url) %>">
       <h1>Your browser does not support html5 video.</h1>
     </video>
 
@@ -19,4 +19,14 @@
     </div>
     <img src="'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';" class="nothing"/>
   </div>
+
+  <div style="clear:both"></div>
+  <%= form_for @gif do |f| %>
+    <%= f.text_field :start_time, id: "start_time_form", class: "hidden" %>
+    <%= f.text_field :end_time, id: "end_time_form", class: "hidden" %>
+    <%= button_tag type: "submit", class: "jumbo-button bounce" do %>
+      <div class="text">Create Your Gif!</div>
+    <% end %>
+
+  <% end %>
 </div>

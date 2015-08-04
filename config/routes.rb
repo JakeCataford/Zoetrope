@@ -5,6 +5,8 @@ Rails.application.routes.draw do
       get "compose"
       get "progress"
       get "validate"
+      get "aborted"
+      post "queue"
     end
   end
 end

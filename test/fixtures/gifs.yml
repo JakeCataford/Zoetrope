@@ -1,7 +1,17 @@
-# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 gif_with_valid_source_url:
   source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
+  session: one
 
 gif_with_shortform_url:
   source_url: https://youtu.be/fNCuInGejuw
+  session: one
+
+validating:
+  source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
+  queue_status: <%= Gif.queue_statuses["validating"] %>
+  session: one
+
+composing:
+  source_url: https://www.youtube.com/watch?v=PzxsSTxWHhg
+  queue_status: <%= Gif.queue_statuses["composing"] %>
+  session: one

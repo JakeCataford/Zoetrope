@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150731202324) do
+ActiveRecord::Schema.define(version: 20150804153349) do
 
   create_table "gifs", force: :cascade do |t|
     t.string   "title"
@@ -28,6 +28,7 @@ ActiveRecord::Schema.define(version: 20150731202324) do
     t.integer  "video_length"
     t.integer  "external_validation_status", default: 0
     t.string   "temporary_download_link"
+    t.string   "abort_reason"
   end
 
   create_table "sessions", force: :cascade do |t|

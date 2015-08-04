@@ -2,6 +2,9 @@ require 'test_helper'
 
 class GifTest < ActiveSupport::TestCase
   def setup
+    ProcessVideoToGifJob.any_instance.stubs(:perform)
+    ValidateYoutubeLinkJob.any_instance.stubs(:perform)
+
     VCR.insert_cassette("gif_requests", :record => :new_episodes)
     @new_gif = Gif.new
     @gif = gifs(:gif_with_valid_source_url)
@@ -34,17 +37,11 @@ class GifTest < ActiveSupport::TestCase
   end
 
   test "viddlerb can get longform url" do
-    assert_not_nil(@gif.video_download_link)
+    assert_not_nil(@gif.youtube_video_download_link)
   end
 
   test "viddlerb can get shortform url" do
-    assert_not_nil(@gif.video_download_link)
-  end
-
-  test "validates source_url rejects dead links" do
-    @new_gif.source_url = "http://youtube.com/watch?v=SUPERDUPERDEADLINK"
-    @new_gif.save
-    assert_errors(@new_gif, :source_url)
+    assert_not_nil(@gif.youtube_video_download_link)
   end
 
   test "validates source_url accepts working links" do
@@ -53,12 +50,11 @@ class GifTest < ActiveSupport::TestCase
   end
 
   test "video_download_link returns a url" do
-    assert(@gif.video_download_link, "Download link did not get set on save.")
+    assert(@gif.youtube_video_download_link, "Download link was not retrievable.")
   end
 
-  test "title is set on save" do
-    @gif.save
-    assert_equal("SVBLM Presents: The Stranger (Release Trailer)", @gif.title)
+  test "#youtube_video_title gets title from video metadata" do
+    assert_equal("SVBLM Presents: The Stranger (Release Trailer)", @gif.youtube_video_title)
   end
 
   private

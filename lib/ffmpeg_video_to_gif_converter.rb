@@ -7,8 +7,8 @@ class FFMpegVideoGifConverter
     @file_path = file_path
 
     defaults = {
-      start_frame: 0,
-      length: 100,
+      start_time: 0,
+      end_time: 100,
       flags: "lanczos",
       fps: 20,
       scale: 0.5
@@ -22,7 +22,7 @@ class FFMpegVideoGifConverter
     command << "-i #{@file_path} "
     command << "-lavfi "
     command << "\""
-    command << "trim=start_frame=#{@options[:start_frame]}:end_frame=#{@options[:start_frame] + @options[:length]},"
+    command << "trim=start=#{@options[:start_time]}:end=#{@options[:end_time]},"
     command << "fps=#{@options[:fps]},"
     command << "scale=iw*#{@options[:scale]}:ih*#{@options[:scale]}"
     command << ":flags=#{@options[:flags]},palettegen "
@@ -48,7 +48,7 @@ class FFMpegVideoGifConverter
     command << "-i #{@optimization_pallete} " unless @optimization_pallete.nil?
     command << "-lavfi "
     command << "\""
-    command << "trim=start_frame=#{@options[:start_frame]}:end_frame=#{@options[:start_frame] + @options[:length]},"
+    command << "trim=start=#{@options[:start_time]}:end=#{@options[:end_time]},"
     command << "fps=#{@options[:fps]},"
     command << "scale=iw*#{@options[:scale]}:ih*#{@options[:scale]}:"
     command << "flags=#{@options[:flags]},"
@@ -59,13 +59,15 @@ class FFMpegVideoGifConverter
 
     command.chomp!
 
+    byebug
+
     success = exec_ffmpeg_command(command) do |progress|
       on_progress.call progress
     end
 
     raise "Failed to transcode video to gif." unless success
 
-    File.delete(@optimization_path)
+    File.delete(@optimization_pallete)
 
     output_path
   end

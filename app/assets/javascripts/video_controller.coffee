@@ -3,8 +3,6 @@ window.playrange =
   end: 10
 
 VideoController =
-
-
   init: ->
     min_handle = document.querySelector(".handle.min")
     max_handle = document.querySelector(".handle.max")
@@ -71,11 +69,14 @@ VideoController =
     event.preventDefault()
 
   updatePlayrange: (video, min_handle, max_handle) ->
-    playrange.end= video.duration * (max_handle.offsetLeft/500)
+    playrange.end = video.duration * (max_handle.offsetLeft/500)
     playrange.start = video.duration * ((min_handle.offsetLeft + min_handle.offsetWidth)/500)
 
     video.currentTime = playrange.start if video.currentTime < playrange.start
     video.currentTime = playrange.end if video.currentTime > playrange.end
+
+    $("#start_time_form").val(playrange.start)
+    $("#end_time_form").val(playrange.end)
 
     min_handle.querySelector(".time-display").innerHTML = "#{playrange.start.toFixed(2)}s"
     max_handle.querySelector(".time-display").innerHTML = "#{playrange.end.toFixed(2)}s"
@@ -91,7 +92,6 @@ VideoController =
     time = handle.querySelector(".time-display")
     time.classList.remove("bounce-in")
     time.classList.add("bounce-out")
-
 
 ready = ->
   VideoController.init()

@@ -17,6 +17,7 @@ gem "open4"
 group :test do
   gem 'webmock'
   gem 'vcr'
+  gem 'mocha', '~> 1.1.0'
 end
 
 group :development, :test do
