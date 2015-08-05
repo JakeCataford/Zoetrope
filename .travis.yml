@@ -4,6 +4,5 @@ rvm:
 addons:
   apt:
     packages:
-      - gcc-4.8
       - yasm
 install: ./script/test_dependencies
