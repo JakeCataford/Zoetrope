@@ -1,4 +1,9 @@
 language: ruby
 rvm:
   - 2.1.0
+addons:
+  apt:
+    packages:
+      - gcc-4.8
+      - yasm
 install: ./script/test_dependencies
