@@ -3,25 +3,26 @@ require 'ffmpeg_video_to_gif_converter'
 class ProcessVideoToGifJob < ActiveJob::Base
   queue_as :default
   def perform(gif_id, url)
-    @gif = Gif.find(gif_id)
-    @gif.processing!
-    update_gif_status("Fetching video from youtube...")
-    video_path = download_video(url)
-    update_gif_status("Converting video to gif...")
-    gif_path = convert_video_to_gif(video_path)
-    update_gif_status("Uploading gif to imgur.")
-    upload_image(gif_path)
-    update_gif_status("Cleaning up.")
-    File.delete(video_path)
-    File.delete(gif_path)
-    update_gif_status("Done!")
+    haltable do
+      @gif = Gif.find(gif_id)
+      @gif.processing!
+      update_gif_status("Fetching video from youtube...")
+      video_path = download_video(url)
+      update_gif_status("Converting video to gif...")
+      gif_path = convert_video_to_gif(video_path)
+      update_gif_status("Uploading gif to imgur.")
+      upload_image(gif_path)
+      update_gif_status("Cleaning up.")
+      File.delete(video_path)
+      File.delete(gif_path)
+      update_gif_status("Done!")
+    end
   rescue YoutubeVideo::VideoLinkUnavailable, YoutubeVideo::VideoMetadataUnavailable => e
     @gif.abort("We couldn't reach youtube to process your video.")
     raise e
   end
 
   def download_video(url)
-    puts "downloading video\n"
     uri = URI(url)
     begin
       file = Tempfile.open(["gif_#{@gif.id}_", ".flv"], Rails.root.join('tmp'), encoding: 'ascii-8bit')
@@ -35,11 +36,13 @@ class ProcessVideoToGifJob < ActiveJob::Base
             amount_downloaded += chunk.size
             percent_downloaded = (amount_downloaded.to_f / file_size * 100)
             update_gif_progress(percent_downloaded)
-            print "%.2f%" % percent_downloaded
-            print "\r"
           end
         end
       end
+    rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+           Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError
+      @gif.abort("Failed to download video.")
+      halt
     ensure
       file.close
     end
@@ -50,7 +53,6 @@ class ProcessVideoToGifJob < ActiveJob::Base
     imgur_client_id = ENV["IMGUR_CLIENT_ID"]
     conn = Faraday.new "https://api.imgur.com" do |f|
       f.request :multipart
-      f.response :logger
       f.adapter Faraday.default_adapter
     end
 
@@ -66,23 +68,14 @@ class ProcessVideoToGifJob < ActiveJob::Base
       @gif.ready!
     else
       @gif.abort("Failed to upload image to imgur.") unless imgur_response.success?
+      halt
     end
   end
 
   def convert_video_to_gif(video_path)
-    byebug
     vid_to_gif = FFMpegVideoGifConverter.new video_path, start_time: @gif.start_time, end_time: @gif.end_time
-
-    puts "Generating pallete for gif..."
-    vid_to_gif.create_optimization_pallete! do |progress|
-      puts progress
-    end
-
-    puts "Converting video to gif..."
-    vid_to_gif.transcode do |progress|
-      puts progress
-    end
-
+    vid_to_gif.create_optimization_pallete!
+    vid_to_gif.transcode
     vid_to_gif.output_path
   end
 
@@ -94,5 +87,15 @@ class ProcessVideoToGifJob < ActiveJob::Base
   def update_gif_progress(progress)
     @gif.progress = progress
     @gif.save
+  end
+
+  def haltable
+    catch(:halt) do
+      yield
+    end
+  end
+
+  def halt
+    throw(:halt)
   end
 end

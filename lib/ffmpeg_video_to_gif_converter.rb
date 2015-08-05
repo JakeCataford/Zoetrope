@@ -59,8 +59,6 @@ class FFMpegVideoGifConverter
 
     command.chomp!
 
-    byebug
-
     success = exec_ffmpeg_command(command) do |progress|
       on_progress.call progress
     end

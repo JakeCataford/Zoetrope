@@ -6,6 +6,7 @@ require 'mocha/mini_test'
 
 class ActiveSupport::TestCase
   fixtures :all
+  Resque.mock!
 
   VCR.configure do |config|
     config.cassette_library_dir = "fixtures/vcr_cassettes"
