@@ -1,4 +1,4 @@
 language: ruby
 rvm:
   - 2.1.0
-install: ./script/dependencies
+install: ./script/test_dependencies
