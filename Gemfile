@@ -18,6 +18,7 @@ group :test do
   gem 'vcr'
   gem 'mocha', '~> 1.1.0'
   gem 'resque-mock', '~> 0.1.1'
+  gem 'codeclimate-test-reporter', require: nil
 end
 
 group :development, :test do

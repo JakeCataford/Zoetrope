@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# install ffmpeg
+if ! type "ffmpeg" > /dev/null; then
+wget http://ffmpeg.org/releases/ffmpeg-2.7.2.tar.bz2
+tar -xvf ffmpeg-2.7.2.tar.bz2
+cd ffmpeg-2.7.2
+./configure
+make && make install
+fi
+
+
