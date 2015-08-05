@@ -19,6 +19,10 @@ class ProcessVideoToGifJobTest < ActiveJob::TestCase
     assert(@gif.queue_status, Gif.queue_statuses["ready"])
   end
 
+  test "media transcoding" do
+    
+  end
+
   private
 
   def file_fixture_path(filename)
