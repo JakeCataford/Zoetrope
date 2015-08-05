@@ -13,6 +13,9 @@ gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
 gem "viddl-rb"
 gem "open4"
 
+gem 'capistrano',  '~> 3.1'
+gem 'capistrano-rails', '~> 1.1'
+
 group :test do
   gem 'webmock'
   gem 'vcr'

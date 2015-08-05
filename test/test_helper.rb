@@ -4,9 +4,6 @@ require 'rails/test_help'
 require 'vcr'
 require 'mocha/mini_test'
 
-require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
-
 class ActiveSupport::TestCase
   fixtures :all
   Resque.mock!
