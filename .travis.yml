@@ -1,9 +1,8 @@
 language: ruby
 rvm:
   - 2.1.0
-sudo: required
 addons:
   apt:
     packages:
       - yasm
-install: ./script/test_dependencies
+before_install: ./script/test_dependencies
